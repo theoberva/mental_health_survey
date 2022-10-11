@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/tberv/Downloads/mental_health.sqlite" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="903"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,6:mainAnswer"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Answer" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="86"/><column index="2" value="68"/><column index="3" value="51"/><column index="4" value="79"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="Nulls">SELECT COUNT(*)
+FROM Answer
+WHERE AnswerText IS NULL;
+
+SELECT COUNT(*)
+FROM Answer
+WHERE UserID IS NULL;
+
+SELECT COUNT(*)
+FROM Answer
+WHERE questionid IS NULL;
+
+SELECT count(*)
+FROM question WHERE questionid IS NULL
+
+
+SELECT count(*)
+FROM question WHERE questiontext IS NULL</sql><sql name="EDA">SELECT q.questionid, q.questiontext, COUNT(a.answertext)
+FROM Question q
+JOIN Answer a
+	ON q.questionid = a.questionid
+GROUP BY q.questiontext
+ORDER BY 1;
+
+SELECT SurveyID, COUNT(DISTINCT userID)
+FROM Answer
+GROUP BY surveyID;
+
+CREATE TABLE new_answers AS
+	SELECT *
+	FROM Answer 
+	WHERE questionid IN (1,2,7,8,10,33,96,118)
+
+	
+</sql><sql name="avg age">CREATE TABLE age AS
+SELECT UserID, a.AnswerText AS age
+	FROM Question q
+	JOIN Answer a
+		ON q.questionid = a.questionid
+	WHERE q.questionid = 1
+
+SELECT CASE
+	WHEN age &lt; 20 THEN &quot;0-20&quot;
+	WHEN age BETWEEN 20 AND 29 THEN &quot;20-29&quot;
+	WHEN age BETWEEN 30 AND 39 THEN &quot;30-39&quot;
+	WHEN age BETWEEN 40 AND 49 THEN &quot;40-49&quot;
+	WHEN age BETWEEN 50 AND 59 THEN &quot;50-59&quot;
+	ELSE &quot;60+&quot;
+	END AS age_group, COUNT(*)
+FROM age
+GROUP BY 1
+	
+
+SELECT AVG(age)
+FROM age
+
+
+</sql><sql name="gender">UPDATE Answer
+SET AnswerText = UPPER(answertext)
+WHERE questionid = 2;
+
+UPDATE Answer
+SET AnswerText = &quot;Other&quot;
+WHERE questionid = 2 
+AND AnswerText NOT IN (&quot;MALE&quot;,&quot;FEMALE&quot;)
+
+
+SELECT AnswerText AS Gender, COUNT(*) AS Count
+FROM Answer
+WHERE questionid = 2
+GROUP BY Gender
+ORDER BY 2 DESC;</sql><sql name="Q2">UPDATE new_answers
+SET AnswerText = &quot;Maybe&quot;
+WHERE questionid = 33
+AND AnswerText NOT IN (&quot;Yes&quot;,&quot;No&quot;)
+
+SELECT DISTINCT AnswerText AS &quot;Have mental health disorder&quot;, COUNT(*) AS Count
+FROM new_answers
+WHERE questionid = 33
+GROUP BY AnswerText
+ORDER BY 2 DESC;</sql><sql name="Q3">WITH temp_table AS 
+	(SELECT *
+	FROM new_answers
+	JOIN age
+		ON new_answers.UserID = age.UserID)
+		
+SELECT CASE
+	WHEN AnswerText = 0 THEN &quot;NO&quot;
+	WHEN AnswerText = 1 THEN &quot;YES&quot;
+	END AS &quot;Seek treatment&quot;
+	, ROUND(AVG(age),0) AS &quot;Average Age&quot;
+FROM temp_table
+WHERE questionid = 7
+GROUP BY AnswerText;
+</sql><sql name="Q4">CREATE TABLE gender AS
+	SELECT userID, AnswerText AS gender
+	FROM new_answers
+	WHERE questionid = 2;
+
+WITH temp_table AS 
+	(SELECT *
+	FROM new_answers
+	JOIN gender
+		ON new_answers.UserID = gender.UserID)
+
+SELECT gender, CASE
+	WHEN AnswerText = 0 THEN &quot;NO&quot;
+	WHEN AnswerText = 1 THEN &quot;YES&quot;
+	END AS &quot;Seek treatment&quot;, COUNT(answertext)
+FROM temp_table
+WHERE questionid = 7
+GROUP BY 1,2
+		
+
+		
+
+		</sql><sql name="Q5">UPDATE new_answers
+SET AnswerText = &quot;Not Sure&quot;
+WHERE AnswerText NOT IN (&quot;Yes&quot;, &quot;No&quot;)
+AND questionid = 10
+
+SELECT AnswerText AS &quot;Provide_benifits&quot;, COUNT(*) AS Count
+FROM new_answers
+WHERE questionid = 10
+GROUP BY 1;
+
+
+UPDATE new_answers
+SET AnswerText = &quot;Not Sure&quot;
+WHERE AnswerText = &quot;Don't know&quot;
+AND questionid = 96
+
+SELECT AnswerText AS &quot;Provide_resources&quot;, COUNT(*) AS Count
+FROM new_answers
+WHERE questionid = 96
+GROUP BY 1;</sql><sql name="Q6">WITH temp_table AS
+	(SELECT UserID, AnswerText AS &quot;remote_work&quot;
+	FROM new_answers
+	WHERE questionid = 118)
+	
+SELECT AnswerText AS &quot;Mental_health_disorder&quot;,remote_work, COUNT(*) AS Count
+FROM new_answers
+JOIN temp_table
+	ON new_answers.UserID = temp_table.UserID
+WHERE Questionid = 33
+GROUP BY remote_work,Mental_health_disorder </sql><current_tab id="8"/></tab_sql></sqlb_project>
