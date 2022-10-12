@@ -16,6 +16,27 @@ JOIN Answer a
 GROUP BY q.questiontext
 ORDER BY 1;
 
+-- Check for Null values
+
+SELECT COUNT(*)
+FROM Answer
+WHERE AnswerText IS NULL;
+
+SELECT COUNT(*)
+FROM Answer
+WHERE UserID IS NULL;
+
+SELECT COUNT(*)
+FROM Answer
+WHERE questionid IS NULL;
+
+SELECT count(*)
+FROM question WHERE questionid IS NULL
+
+
+SELECT count(*)
+FROM question WHERE questiontext IS NULL
+
 -- Create a new table with only the questions we want to explore
 
 CREATE TABLE new_answers AS
@@ -86,6 +107,18 @@ CREATE TABLE gender AS
 	FROM new_answers
 	WHERE questionid = 2;
 
+UPDATE gender
+SET gender = lower(gender);
+
+UPDATE gender
+SET gender = "other" 
+WHERE gender NOT IN ("male", "female");
+
+SELECT gender, COUNT(gender) AS count
+FROM gender
+GROUP BY gender;
+
+	
 WITH temp_table AS 
 	(SELECT *
 	FROM new_answers
@@ -95,10 +128,11 @@ WITH temp_table AS
 SELECT gender, CASE
 	WHEN AnswerText = 0 THEN "NO"
 	WHEN AnswerText = 1 THEN "YES"
-	END AS "Seek treatment", COUNT(answertext)
+	END AS "Seek treatment", COUNT(answertext) AS count
 FROM temp_table
 WHERE questionid = 7
 GROUP BY 1,2
+		
 
 -- Question 5: Do companies provide benefits/ learning resources?
 
